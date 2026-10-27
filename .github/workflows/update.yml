@@ -1,0 +1,56 @@
+name: update
+
+on:
+  schedule:
+    - cron: "17 9 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Channels and stream check
+        run: python scripts/build_data.py
+
+      - name: Get the guide grabber
+        run: |
+          git clone --depth 1 https://github.com/iptv-org/epg.git /tmp/epg
+          cd /tmp/epg && npm install --no-audit --no-fund --ignore-scripts && npm run api:load
+
+      - name: Grab listings
+        continue-on-error: true
+        working-directory: /tmp/epg
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/epg/guides"
+          timeout 100m npm run grab --- --channels="$GITHUB_WORKSPACE/epg/custom.channels.xml" \
+            --output="$GITHUB_WORKSPACE/epg/guides/{site}.xml" --days=2 --maxConnections=10 --timeout=20000 > /tmp/grab.log 2>&1 || true
+          tail -5 /tmp/grab.log
+
+      - name: Build guide file
+        run: python scripts/build_guide.py
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/channels.json data/guide.json.gz
+          git commit -m "Update channels and guide" || exit 0
+          git push

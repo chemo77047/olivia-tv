@@ -51,6 +51,8 @@ sub init()
 
     m.grid.observeField("programFocused", "onProgramFocused")
     m.grid.observeField("programSelected", "onProgramSelected")
+    m.grid.observeField("channelSelected", "onProgramSelected")
+    m.selectClock = CreateObject("roTimespan")
     m.menuList.observeField("itemSelected", "onMenuSelected")
     m.iButtons.observeField("itemSelected", "onInfoButton")
     m.video.observeField("state", "onVideoState")
@@ -251,6 +253,9 @@ sub onProgramFocused()
 end sub
 
 sub onProgramSelected()
+    if m.mode <> "guide" then return
+    if m.selectClock.TotalMilliseconds() < 600 then return
+    m.selectClock.Mark()
     d = m.grid.programFocusedDetails
     if d = invalid or m.content = invalid then return
     ci = d.focusChannelIndex
@@ -609,6 +614,9 @@ function onKeyEvent(key as string, press as boolean) as boolean
     else if m.mode = "guide"
         if key = "options"
             openMenu()
+            return true
+        else if key = "OK"
+            onProgramSelected()
             return true
         end if
     end if

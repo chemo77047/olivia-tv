@@ -16,7 +16,7 @@
       <Label id="sTime" translation="[90,186]" width="1740" font="font:SmallSystemFont" color="0x5EEAD4FF" />
       <Label id="sDesc" translation="[90,220]" width="1740" height="56" wrap="true" maxLines="2" font="font:SmallestSystemFont" color="0xCCDDDDFF" />
 
-      <TimeGrid id="grid" translation="[60,300]" numRows="7" showPastTimeScreen="true" pastTimeScreenBlendColor="0x0D2A30FF"
+      <TimeGrid id="grid" translation="[60,300]" numRows="7" channelInfoComponentName="ChannelItem" showPastTimeScreen="true" pastTimeScreenBlendColor="0x0D2A30FF"
         focusBitmapBlendColor="0x14B8A6FF" channelNoDataText="No info" loadingDataText="Loading..." />
 
       <Label id="emptyLabel" visible="false" translation="[60,560]" width="1800" horizAlign="center" font="font:MediumSystemFont" color="0x99F6E4FF" />

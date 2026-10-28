@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="ChannelItem" extends="Group">
+  <script type="text/brightscript" uri="ChannelItem.brs" />
+  <interface>
+    <field id="width" type="float" onChange="layout" />
+    <field id="height" type="float" onChange="layout" />
+    <field id="content" type="node" onChange="setContent" />
+  </interface>
+  <children>
+    <Poster id="icon" width="72" height="44" loadWidth="144" loadHeight="88" loadDisplayMode="scaleToFit" />
+    <Label id="title" font="font:SmallestBoldSystemFont" color="0xFFFFFFFF" vertAlign="center" wrap="true" maxLines="2" />
+  </children>
+</component>

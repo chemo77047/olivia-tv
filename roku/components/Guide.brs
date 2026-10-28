@@ -3,12 +3,12 @@ sub init()
     m.W = 1800
     m.HDR = 44
     m.RH = 92
-    m.ROWS = 7
+    m.NR = 7
     m.WIN = 7200
     m.PX = (m.W - m.CW) / m.WIN
     m.rows = m.top.findNode("rows")
     m.nowLine = m.top.findNode("nowLine")
-    m.nowLine.height = m.HDR + m.ROWS * m.RH
+    m.nowLine.height = m.HDR + m.NR * m.RH
     hdr = m.top.findNode("hdr")
     hb = hdr.createChild("Rectangle")
     hb.width = m.W
@@ -26,7 +26,7 @@ sub init()
         m.tl.Push(lb)
     end for
     m.slots = []
-    for i = 0 to m.ROWS - 1
+    for i = 0 to m.NR - 1
         g = m.rows.createChild("Group")
         g.translation = [0, m.HDR + i * m.RH]
         bg = g.createChild("Rectangle")
@@ -193,11 +193,11 @@ function onKeyEvent(key as string, press as boolean) as boolean
         if m.row >= n then m.row = 0
         m.prog = pickAt(m.row, m.ft)
     else if key = "rewind"
-        m.row = m.row - m.ROWS
+        m.row = m.row - m.NR
         if m.row < 0 then m.row = 0
         m.prog = pickAt(m.row, m.ft)
     else if key = "fastforward"
-        m.row = m.row + m.ROWS
+        m.row = m.row + m.NR
         if m.row >= n then m.row = n - 1
         m.prog = pickAt(m.row, m.ft)
     else if key = "left"
@@ -260,7 +260,7 @@ end sub
 sub render()
     n = count()
     if m.row < m.first then m.first = m.row
-    if m.row >= m.first + m.ROWS then m.first = m.row - m.ROWS + 1
+    if m.row >= m.first + m.NR then m.first = m.row - m.NR + 1
     if m.first < 0 then m.first = 0
     for k = 0 to 3
         m.tl[k].text = hm(m.ws + k * 1800)
@@ -273,7 +273,7 @@ sub render()
     else
         m.nowLine.visible = false
     end if
-    for i = 0 to m.ROWS - 1
+    for i = 0 to m.NR - 1
         sl = m.slots[i]
         ci = m.first + i
         sl.cells.removeChildrenIndex(sl.cells.getChildCount(), 0)

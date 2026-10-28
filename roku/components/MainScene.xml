@@ -5,9 +5,8 @@
     <Rectangle id="bg" width="1920" height="1080" color="0x071A1EFF" />
 
     <Group id="guide">
-      <Poster id="logo" uri="pkg:/images/logo.png" translation="[60,28]" width="84" height="84" />
-      <Label id="appName" text="Olivia TV" translation="[160,34]" font="font:LargeBoldSystemFont" color="0x14B8A6FF" />
-      <Label id="sectionLabel" translation="[160,84]" font="font:SmallSystemFont" color="0x99F6E4FF" />
+      <Label id="appName" text="Olivia TV" translation="[60,34]" font="font:LargeBoldSystemFont" color="0x14B8A6FF" />
+      <Label id="sectionLabel" translation="[60,84]" font="font:SmallSystemFont" color="0x99F6E4FF" />
       <Label id="clock" translation="[1460,40]" width="400" horizAlign="right" font="font:MediumBoldSystemFont" color="0xFFFFFFFF" />
 
       <Rectangle id="strip" translation="[60,130]" width="1800" height="150" color="0x0D2A30FF" />

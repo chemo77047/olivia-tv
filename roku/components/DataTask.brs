@@ -110,7 +110,7 @@ sub build(req as object)
             ch = root.createChild("ContentNode")
             ch.title = c.name
             if c.logo <> invalid then ch.hdSmallIconUrl = c.logo
-            ch.addFields({cid: c.id, streams: c.streams})
+            ch.addFields({cid: c.id, srcList: c.streams})
             added = 0
             progs = m.guide[c.id]
             if progs <> invalid

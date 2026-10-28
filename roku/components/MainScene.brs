@@ -457,12 +457,16 @@ end sub
 
 sub playStream()
     ch = m.content.getChild(m.playIndex)
-    streams = ch.streams
+    streams = ch.srcList
     if streams = invalid or m.streamIdx >= streams.Count()
         channelFailed()
         return
     end if
     s = streams[m.streamIdx]
+    if type(s) <> "roAssociativeArray" or s.u = invalid
+        nextStream()
+        return
+    end if
     c = CreateObject("roSGNode", "ContentNode")
     c.url = s.u
     c.title = ch.title
@@ -513,7 +517,8 @@ sub nextStream()
     m.tuneTimer.control = "stop"
     m.streamIdx = m.streamIdx + 1
     ch = m.content.getChild(m.playIndex)
-    limit = ch.streams.Count()
+    limit = 0
+    if ch.srcList <> invalid then limit = ch.srcList.Count()
     if limit > 3 then limit = 3
     if m.streamIdx < limit
         playStream()

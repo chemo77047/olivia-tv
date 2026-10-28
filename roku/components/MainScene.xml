@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="MainScene" extends="Scene">
+  <script type="text/brightscript" uri="MainScene.brs" />
+  <children>
+    <Rectangle id="bg" width="1920" height="1080" color="0x071A1EFF" />
+
+    <Group id="guide">
+      <Poster id="logo" uri="pkg:/images/logo.png" translation="[60,28]" width="84" height="84" />
+      <Label id="appName" text="Olivia TV" translation="[160,34]" font="font:LargeBoldSystemFont" color="0x14B8A6FF" />
+      <Label id="sectionLabel" translation="[160,84]" font="font:SmallSystemFont" color="0x99F6E4FF" />
+      <Label id="clock" translation="[1460,40]" width="400" horizAlign="right" font="font:MediumBoldSystemFont" color="0xFFFFFFFF" />
+
+      <Rectangle id="strip" translation="[60,130]" width="1800" height="150" color="0x0D2A30FF" />
+      <Rectangle translation="[60,130]" width="8" height="150" color="0x14B8A6FF" />
+      <Label id="sTitle" translation="[90,140]" width="1740" font="font:MediumBoldSystemFont" color="0xFFFFFFFF" />
+      <Label id="sTime" translation="[90,186]" width="1740" font="font:SmallSystemFont" color="0x5EEAD4FF" />
+      <Label id="sDesc" translation="[90,220]" width="1740" height="56" wrap="true" maxLines="2" font="font:SmallestSystemFont" color="0xCCDDDDFF" />
+
+      <TimeGrid id="grid" translation="[60,300]" numRows="7" showPastTimeScreen="true" pastTimeScreenBlendColor="0x0D2A30FF"
+        focusBitmapBlendColor="0x14B8A6FF" channelNoDataText="No info" loadingDataText="Loading..." />
+
+      <Label id="emptyLabel" visible="false" translation="[60,560]" width="1800" horizAlign="center" font="font:MediumSystemFont" color="0x99F6E4FF" />
+      <Label id="hints" translation="[60,1020]" width="1800" font="font:SmallestSystemFont" color="0x99F6E4FF"
+        text="OK  Watch or show info        *  Menu: sections, search, favorites        Back  Exit" />
+    </Group>
+
+    <Group id="player" visible="false">
+      <Video id="video" width="1920" height="1080" enableUI="false" />
+      <Group id="banner" visible="false">
+        <Rectangle translation="[0,820]" width="1920" height="260" color="0x071A1EE6" />
+        <Rectangle translation="[0,820]" width="1920" height="6" color="0x14B8A6FF" />
+        <Poster id="bLogo" translation="[60,860]" width="200" height="150" loadDisplayMode="scaleToFit" />
+        <Label id="bName" translation="[300,850]" width="1300" font="font:LargeBoldSystemFont" color="0x14B8A6FF" />
+        <Label id="bNow" translation="[300,920]" width="1560" font="font:MediumSystemFont" color="0xFFFFFFFF" />
+        <Label id="bNext" translation="[300,970]" width="1560" font="font:SmallSystemFont" color="0xBBCCCCFF" />
+        <Label id="bClock" translation="[1460,860]" width="400" horizAlign="right" font="font:MediumBoldSystemFont" color="0xFFFFFFFF" />
+        <Label id="bHint" translation="[1060,1030]" width="800" horizAlign="right" font="font:SmallestSystemFont" color="0x99F6E4FF"
+          text="Up/Down  Change channel    OK  Guide    *  Favorite" />
+      </Group>
+      <Label id="status" visible="false" translation="[0,500]" width="1920" horizAlign="center" font="font:LargeBoldSystemFont" color="0xFFFFFFFF" />
+    </Group>
+
+    <Group id="menu" visible="false">
+      <Rectangle width="1920" height="1080" color="0x000000A0" />
+      <Rectangle width="600" height="1080" color="0x0D2A30FF" />
+      <Rectangle translation="[600,0]" width="6" height="1080" color="0x14B8A6FF" />
+      <Label text="Olivia TV" translation="[60,60]" font="font:LargeBoldSystemFont" color="0x14B8A6FF" />
+      <LabelList id="menuList" translation="[60,160]" itemSize="[480,64]" itemSpacing="[0,8]" numRows="12"
+        color="0xFFFFFFFF" focusedColor="0x071A1EFF" focusBitmapBlendColor="0x14B8A6FF" font="font:MediumSystemFont" focusedFont="font:MediumBoldSystemFont" />
+    </Group>
+
+    <Group id="info" visible="false">
+      <Rectangle width="1920" height="1080" color="0x000000B0" />
+      <Rectangle translation="[310,190]" width="1300" height="700" color="0x0D2A30FF" />
+      <Rectangle translation="[310,190]" width="1300" height="8" color="0x14B8A6FF" />
+      <Label id="iTitle" translation="[360,230]" width="1200" wrap="true" maxLines="2" font="font:LargeBoldSystemFont" color="0xFFFFFFFF" />
+      <Label id="iChan" translation="[360,330]" width="1200" font="font:MediumSystemFont" color="0x14B8A6FF" />
+      <Label id="iTime" translation="[360,380]" width="1200" font="font:SmallSystemFont" color="0x99F6E4FF" />
+      <Label id="iDesc" translation="[360,430]" width="1200" height="230" wrap="true" maxLines="6" font="font:SmallSystemFont" color="0xDDE8E8FF" />
+      <LabelList id="iButtons" translation="[360,680]" itemSize="[600,60]" itemSpacing="[0,8]" numRows="3"
+        color="0xFFFFFFFF" focusedColor="0x071A1EFF" focusBitmapBlendColor="0x14B8A6FF" font="font:MediumSystemFont" focusedFont="font:MediumBoldSystemFont" />
+    </Group>
+
+    <Label id="toast" visible="false" translation="[0,60]" width="1920" horizAlign="center" font="font:MediumBoldSystemFont" color="0x5EEAD4FF" />
+    <Label id="loading" text="Loading channels..." translation="[0,560]" width="1920" horizAlign="center" font="font:LargeBoldSystemFont" color="0x14B8A6FF" />
+
+    <Timer id="tuneTimer" duration="15" repeat="false" />
+    <Timer id="bannerTimer" duration="6" repeat="false" />
+    <Timer id="toastTimer" duration="3" repeat="false" />
+    <Timer id="clockTimer" duration="20" repeat="true" />
+  </children>
+</component>

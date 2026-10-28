@@ -102,6 +102,13 @@ def main():
     out = os.path.join(ROOT, "data", "guide.json.gz")
     with gzip.open(out, "wt", encoding="utf-8") as f:
         json.dump({"start": now, "ch": ch}, f, ensure_ascii=False, separators=(",", ":"))
+    roku = {}
+    for cid, progs in ch.items():
+        keep = [[p[0], p[1], p[2], p[3][:200], p[4]] for p in progs if p[1] > now - 3600 and p[0] < now + 12 * 3600]
+        if keep:
+            roku[cid] = keep
+    with open(os.path.join(ROOT, "data", "roku_guide.json"), "w", encoding="utf-8") as f:
+        json.dump({"start": now, "ch": roku}, f, ensure_ascii=False, separators=(",", ":"))
     print(f"guide: {len(ch)} channels, {sum(len(v) for v in ch.values())} programs, {os.path.getsize(out)} bytes")
 
 

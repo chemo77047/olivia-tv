@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<component name="Guide" extends="Group">
+  <script type="text/brightscript" uri="Guide.brs" />
+  <interface>
+    <field id="content" type="node" onChange="onContent" />
+    <field id="jumpTo" type="integer" onChange="onJump" alwaysNotify="true" />
+    <field id="refresh" type="boolean" onChange="render" alwaysNotify="true" />
+    <field id="focused" type="assocarray" alwaysNotify="true" />
+    <field id="selected" type="assocarray" alwaysNotify="true" />
+  </interface>
+  <children>
+    <Group id="hdr" />
+    <Group id="rows" />
+    <Rectangle id="nowLine" width="4" color="0x5EEAD4FF" visible="false" />
+  </children>
+</component>

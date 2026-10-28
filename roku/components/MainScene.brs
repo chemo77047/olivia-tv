@@ -49,10 +49,8 @@ sub init()
 
     m.sections = [["fav", "Favorites"], ["kids", "Kids"], ["mx", "México"], ["es", "Español (US)"], ["us", "US"], ["all", "All Channels"]]
 
-    m.grid.observeField("programFocused", "onProgramFocused")
-    m.grid.observeField("programSelected", "onProgSel")
-    m.grid.observeField("channelSelected", "onChanSel")
-    m.selectClock = CreateObject("roTimespan")
+    m.grid.observeField("focused", "onProgramFocused")
+    m.grid.observeField("selected", "onProgramSelected")
     m.menuList.observeField("itemSelected", "onMenuSelected")
     m.iButtons.observeField("itemSelected", "onInfoButton")
     m.video.observeField("state", "onVideoState")
@@ -144,6 +142,7 @@ sub updateClock()
     t = hm(nowSecs())
     m.clock.text = t
     m.bClock.text = t
+    if m.mode = "guide" and m.content <> invalid then m.grid.refresh = true
 end sub
 
 ' ---------- data ----------
@@ -176,10 +175,7 @@ sub onResult()
     lbl = sectionName(m.section)
     if m.section = "search" then lbl = "Search: " + root.query
     m.sectionLabel.text = lbl + "  ·  " + count.ToStr() + " channels"
-    t = nowSecs()
-    m.grid.contentStartTime = t - (t mod 1800)
     m.grid.content = root
-    resetSelection()
     m.focusChannel = 0
     m.emptyLabel.visible = (count = 0)
     if count = 0
@@ -196,7 +192,7 @@ sub onResult()
         m.firstLoad = false
         idx = findChannel(regStr("last"))
         if idx >= 0
-            m.grid.jumpToChannel = idx
+            m.grid.jumpTo = idx
             m.focusChannel = idx
             startChannel(idx, 1, true)
             return
@@ -222,7 +218,6 @@ sub showGuide()
     m.menu.visible = false
     m.info.visible = false
     m.guide.visible = true
-    resetSelection()
     if m.content <> invalid and m.content.getChildCount() > 0
         m.grid.setFocus(true)
     else
@@ -231,15 +226,13 @@ sub showGuide()
 end sub
 
 sub onProgramFocused()
-    d = m.grid.programFocusedDetails
-    if d = invalid or m.content = invalid then return
-    ci = d.focusChannelIndex
-    if ci = invalid then return
+    d = m.grid.focused
+    if d = invalid or m.content = invalid or d.ch = invalid then return
+    ci = d.ch
     ch = m.content.getChild(ci)
     if ch = invalid then return
     m.focusChannel = ci
-    p = invalid
-    if d.focusIndex <> invalid then p = ch.getChild(d.focusIndex)
+    p = d.prog
     if p = invalid or isNoInfo(p)
         m.sTitle.text = ch.title
         m.sTime.text = "No guide info for this channel"
@@ -254,34 +247,13 @@ sub onProgramFocused()
     m.sDesc.text = p.description
 end sub
 
-sub resetSelection()
-    m.grid.programSelected = -1
-    m.grid.channelSelected = -1
-end sub
-
-sub onProgSel()
-    v = m.grid.programSelected
-    if v <> invalid and v >= 0 then onProgramSelected()
-end sub
-
-sub onChanSel()
-    v = m.grid.channelSelected
-    if v <> invalid and v >= 0 then onProgramSelected()
-end sub
-
 sub onProgramSelected()
     if m.mode <> "guide" then return
-    resetSelection()
-    if m.selectClock.TotalMilliseconds() < 600 then return
-    m.selectClock.Mark()
-    d = m.grid.programFocusedDetails
-    if d = invalid or m.content = invalid then return
-    ci = d.focusChannelIndex
-    if ci = invalid then return
-    ch = m.content.getChild(ci)
-    if ch = invalid then return
-    p = invalid
-    if d.focusIndex <> invalid then p = ch.getChild(d.focusIndex)
+    d = m.grid.focused
+    if d = invalid or m.content = invalid or d.ch = invalid then return
+    ci = d.ch
+    if m.content.getChild(ci) = invalid then return
+    p = d.prog
     if p = invalid or isNoInfo(p) or isOnNow(p)
         startChannel(ci, 1, true)
     else
@@ -607,7 +579,7 @@ sub leavePlayer()
     m.video.control = "stop"
     m.status.visible = false
     m.banner.visible = false
-    if m.playIndex >= 0 then m.grid.jumpToChannel = m.playIndex
+    if m.playIndex >= 0 then m.grid.jumpTo = m.playIndex
     showGuide()
 end sub
 

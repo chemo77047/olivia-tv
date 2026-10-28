@@ -50,8 +50,8 @@ sub init()
     m.sections = [["fav", "Favorites"], ["kids", "Kids"], ["mx", "México"], ["es", "Español (US)"], ["us", "US"], ["all", "All Channels"]]
 
     m.grid.observeField("programFocused", "onProgramFocused")
-    m.grid.observeField("programSelected", "onProgramSelected")
-    m.grid.observeField("channelSelected", "onProgramSelected")
+    m.grid.observeField("programSelected", "onProgSel")
+    m.grid.observeField("channelSelected", "onChanSel")
     m.selectClock = CreateObject("roTimespan")
     m.menuList.observeField("itemSelected", "onMenuSelected")
     m.iButtons.observeField("itemSelected", "onInfoButton")
@@ -179,6 +179,7 @@ sub onResult()
     t = nowSecs()
     m.grid.contentStartTime = t - (t mod 1800)
     m.grid.content = root
+    resetSelection()
     m.focusChannel = 0
     m.emptyLabel.visible = (count = 0)
     if count = 0
@@ -221,6 +222,7 @@ sub showGuide()
     m.menu.visible = false
     m.info.visible = false
     m.guide.visible = true
+    resetSelection()
     if m.content <> invalid and m.content.getChildCount() > 0
         m.grid.setFocus(true)
     else
@@ -252,8 +254,24 @@ sub onProgramFocused()
     m.sDesc.text = p.description
 end sub
 
+sub resetSelection()
+    m.grid.programSelected = -1
+    m.grid.channelSelected = -1
+end sub
+
+sub onProgSel()
+    v = m.grid.programSelected
+    if v <> invalid and v >= 0 then onProgramSelected()
+end sub
+
+sub onChanSel()
+    v = m.grid.channelSelected
+    if v <> invalid and v >= 0 then onProgramSelected()
+end sub
+
 sub onProgramSelected()
     if m.mode <> "guide" then return
+    resetSelection()
     if m.selectClock.TotalMilliseconds() < 600 then return
     m.selectClock.Mark()
     d = m.grid.programFocusedDetails

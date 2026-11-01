@@ -21,7 +21,7 @@
 
       <Label id="emptyLabel" visible="false" translation="[60,560]" width="1800" horizAlign="center" font="font:MediumSystemFont" color="0x99F6E4FF" />
       <Label id="hints" translation="[60,1020]" width="1800" font="font:SmallestSystemFont" color="0x99F6E4FF"
-        text="OK  Watch or show info        *  Menu: sections, search, favorites        Back  Exit" />
+        text="OK  Watch or show info        Play/Pause  Favorite        *  Menu: sections, search        Back  Exit" />
     </Group>
 
     <Video id="video" visible="false" width="1920" height="1080" enableUI="false" />

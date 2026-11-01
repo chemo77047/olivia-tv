@@ -41,16 +41,22 @@ sub init()
         po.loadDisplayMode = "scaleToFit"
         lb = g.createChild("Label")
         lb.translation = [92, 0]
-        lb.width = m.CW - 110
+        lb.width = m.CW - 140
         lb.height = m.RH - 6
         lb.vertAlign = "center"
         lb.wrap = true
         lb.maxLines = 2
         lb.font = "font:SmallestBoldSystemFont"
         lb.color = "0xFFFFFFFF"
+        st = g.createChild("Poster")
+        st.translation = [m.CW - 42, (m.RH - 6 - 28) / 2]
+        st.width = 28
+        st.height = 28
+        st.uri = "pkg:/images/star.png"
+        st.visible = false
         cells = g.createChild("Group")
         cells.translation = [m.CW, 0]
-        m.slots.Push({g: g, bg: bg, po: po, lb: lb, cells: cells})
+        m.slots.Push({g: g, bg: bg, po: po, lb: lb, st: st, cells: cells})
     end for
     m.cache = {}
     m.row = 0
@@ -287,6 +293,7 @@ sub render()
             else
                 sl.lb.text = ch.title
             end if
+            sl.st.visible = (ch.fav = true)
             uri = ""
             if ch.hdSmallIconUrl <> invalid then uri = ch.hdSmallIconUrl
             if sl.po.uri <> uri then sl.po.uri = uri

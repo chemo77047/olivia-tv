@@ -201,7 +201,7 @@ sub onResult()
     m.emptyLabel.visible = (count = 0)
     if count = 0
         if m.section = "fav"
-            m.emptyLabel.text = "No favorites yet. Press * on a channel to add it."
+            m.emptyLabel.text = "No favorites yet. Press Play/Pause on a channel in the guide to add it."
         else if m.section = "recent"
             m.emptyLabel.text = "Nothing watched yet."
         else
@@ -352,6 +352,8 @@ sub toggleFav(ci as integer)
         showToast(ch.title + " added to Favorites")
     end if
     regWrite("favs", FormatJson(m.favs))
+    ch.fav = m.favs.DoesExist(cid)
+    m.grid.refresh = true
 end sub
 
 sub showToast(text as string)
@@ -854,6 +856,9 @@ function onKeyEvent(key as string, press as boolean) as boolean
             return true
         else if key = "replay"
             playPrev()
+            return true
+        else if key = "play"
+            toggleFav(m.focusChannel)
             return true
         end if
     end if

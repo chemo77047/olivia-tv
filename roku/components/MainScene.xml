@@ -40,8 +40,12 @@
       <Group id="watchMenu" visible="false">
         <Rectangle translation="[60,520]" width="640" height="280" color="0x0D2A30F0" />
         <Rectangle translation="[60,520]" width="640" height="6" color="0x14B8A6FF" />
-        <LabelList id="wList" translation="[90,560]" itemSize="[580,64]" itemSpacing="[0,8]" numRows="3"
-          color="0xFFFFFFFF" focusedColor="0x071A1EFF" focusBitmapBlendColor="0x14B8A6FF" font="font:MediumSystemFont" focusedFont="font:MediumBoldSystemFont" />
+        <Rectangle id="wBg0" translation="[90,560]" width="580" height="64" color="0x00000000" />
+        <Label id="wL0" translation="[114,560]" width="540" height="64" vertAlign="center" font="font:MediumSystemFont" color="0xFFFFFFFF" />
+        <Rectangle id="wBg1" translation="[90,632]" width="580" height="64" color="0x00000000" />
+        <Label id="wL1" translation="[114,632]" width="540" height="64" vertAlign="center" font="font:MediumSystemFont" color="0xFFFFFFFF" />
+        <Rectangle id="wBg2" translation="[90,704]" width="580" height="64" color="0x00000000" />
+        <Label id="wL2" translation="[114,704]" width="540" height="64" vertAlign="center" font="font:MediumSystemFont" color="0xFFFFFFFF" />
       </Group>
       <Label id="status" visible="false" translation="[0,500]" width="1920" horizAlign="center" font="font:LargeBoldSystemFont" color="0xFFFFFFFF" />
     </Group>

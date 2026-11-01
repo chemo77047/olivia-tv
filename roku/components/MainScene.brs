@@ -27,7 +27,9 @@ sub init()
     m.watchMenu = m.top.findNode("watchMenu")
     m.pvLabel = m.top.findNode("pvLabel")
     m.previewTimer = m.top.findNode("previewTimer")
-    m.wList = m.top.findNode("wList")
+    m.wBg = [m.top.findNode("wBg0"), m.top.findNode("wBg1"), m.top.findNode("wBg2")]
+    m.wL = [m.top.findNode("wL0"), m.top.findNode("wL1"), m.top.findNode("wL2")]
+    m.wSel = 0
     m.toast = m.top.findNode("toast")
     m.loading = m.top.findNode("loading")
     m.tuneTimer = m.top.findNode("tuneTimer")
@@ -70,7 +72,6 @@ sub init()
     m.grid.observeField("selected", "onProgramSelected")
     m.menuList.observeField("itemSelected", "onMenuSelected")
     m.iButtons.observeField("itemSelected", "onInfoButton")
-    m.wList.observeField("itemSelected", "onWatchItem")
     m.video.observeField("state", "onVideoState")
     m.tuneTimer.observeField("fire", "onTuneTimeout")
     m.previewTimer.observeField("fire", "onPreviewTimer")
@@ -734,12 +735,29 @@ end sub
 
 sub openWatchMenu()
     ch = m.content.getChild(m.playIndex)
-    m.wList.content = listContent([favLabel(ch.cid), "Guide", "Keep watching"])
-    m.wList.jumpToItem = 0
+    m.wL[0].text = favLabel(ch.cid)
+    m.wL[1].text = "Guide"
+    m.wL[2].text = "Keep watching"
+    m.wSel = 0
+    drawWatchMenu()
     m.mode = "watchmenu"
     m.watchMenu.visible = true
     showBanner()
-    m.wList.setFocus(true)
+    m.top.setFocus(true)
+end sub
+
+sub drawWatchMenu()
+    for i = 0 to 2
+        if i = m.wSel
+            m.wBg[i].color = "0x14B8A6FF"
+            m.wL[i].color = "0x071A1EFF"
+            m.wL[i].font = "font:MediumBoldSystemFont"
+        else
+            m.wBg[i].color = "0x00000000"
+            m.wL[i].color = "0xFFFFFFFF"
+            m.wL[i].font = "font:MediumSystemFont"
+        end if
+    end for
 end sub
 
 sub closeWatchMenu()
@@ -749,7 +767,7 @@ sub closeWatchMenu()
 end sub
 
 sub onWatchItem()
-    i = m.wList.itemSelected
+    i = m.wSel
     if i = 0
         toggleFav(m.playIndex)
         closeWatchMenu()
@@ -812,8 +830,16 @@ function onKeyEvent(key as string, press as boolean) as boolean
     else if m.mode = "watchmenu"
         if key = "back" or key = "options"
             closeWatchMenu()
-            return true
+        else if key = "up"
+            m.wSel = (m.wSel + 2) mod 3
+            drawWatchMenu()
+        else if key = "down"
+            m.wSel = (m.wSel + 1) mod 3
+            drawWatchMenu()
+        else if key = "OK"
+            onWatchItem()
         end if
+        return true
     else if m.mode = "menu" or m.mode = "info"
         if key = "back" or key = "options"
             showGuide()

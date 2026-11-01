@@ -81,8 +81,19 @@ function include(c as object, section as string, query as string, favs as object
     if section = "fav" then return favs.DoesExist(c.id)
     if section = "kids" then return c.kids <> invalid and c.kids = true
     if section = "mx" or section = "es" or section = "us" then return c.section = section
-    if section = "search" then return query <> "" and Instr(1, fold(c.name), query) > 0
+    if section = "search" then return query <> "" and (Instr(1, fold(c.name), query) > 0 or showMatch(c.id, query, nowS))
     return true
+end function
+
+function showMatch(cid as string, query as string, nowS as integer) as boolean
+    progs = m.guide[cid]
+    if progs = invalid then return false
+    for each p in progs
+        if p[1] > nowS and p[0] < nowS + 12 * 3600
+            if Instr(1, fold(p[2]), query) > 0 then return true
+        end if
+    end for
+    return false
 end function
 
 sub build(req as object)
@@ -105,12 +116,13 @@ sub build(req as object)
     winEnd = nowS + 12 * 3600
     root = CreateObject("roSGNode", "ContentNode")
     root.addFields({section: section, query: query})
-    for each c in m.channels
+    for ci = 0 to m.channels.Count() - 1
+        c = m.channels[ci]
         if include(c, section, query, favs, failed, nowS)
             ch = root.createChild("ContentNode")
             ch.title = c.name
             if c.logo <> invalid then ch.hdSmallIconUrl = c.logo
-            ch.addFields({cid: c.id, srcList: c.streams})
+            ch.addFields({cid: c.id, srcList: c.streams, num: (ci + 1).ToStr()})
             added = 0
             progs = m.guide[c.id]
             if progs <> invalid

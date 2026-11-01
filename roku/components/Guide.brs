@@ -282,7 +282,11 @@ sub render()
         else
             ch = m.top.content.getChild(ci)
             sl.g.visible = true
-            sl.lb.text = ch.title
+            if ch.num <> invalid
+                sl.lb.text = ch.num + "  " + ch.title
+            else
+                sl.lb.text = ch.title
+            end if
             uri = ""
             if ch.hdSmallIconUrl <> invalid then uri = ch.hdSmallIconUrl
             if sl.po.uri <> uri then sl.po.uri = uri

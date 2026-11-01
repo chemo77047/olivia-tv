@@ -32,8 +32,8 @@
         <Label id="bNow" translation="[300,920]" width="1560" font="font:MediumSystemFont" color="0xFFFFFFFF" />
         <Label id="bNext" translation="[300,970]" width="1560" font="font:SmallSystemFont" color="0xBBCCCCFF" />
         <Label id="bClock" translation="[1460,860]" width="400" horizAlign="right" font="font:MediumBoldSystemFont" color="0xFFFFFFFF" />
-        <Label id="bHint" translation="[1060,1030]" width="800" horizAlign="right" font="font:SmallestSystemFont" color="0x99F6E4FF"
-          text="Up/Down  Change channel    OK  Menu    Back  Guide" />
+        <Label id="bHint" translation="[460,1030]" width="1400" horizAlign="right" font="font:SmallestSystemFont" color="0x99F6E4FF"
+          text="Up/Down  Change channel    OK  Menu    Back  Guide    Replay  Last channel" />
       </Group>
       <Group id="watchMenu" visible="false">
         <Rectangle translation="[60,520]" width="640" height="280" color="0x0D2A30F0" />

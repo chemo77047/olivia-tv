@@ -46,6 +46,8 @@ sub init()
     m.kb = invalid
     m.infoChannel = -1
     m.infoProgram = invalid
+    m.curCid = ""
+    m.prevCid = ""
     m.favs = regJson("favs")
     m.failed = regJson("failed")
 
@@ -397,7 +399,7 @@ sub openSearch()
     m.mode = "search"
     kb = CreateObject("roSGNode", "StandardKeyboardDialog")
     kb.title = "Search channels"
-    kb.message = ["Type part of a channel name"]
+    kb.message = ["Type a channel or show name"]
     kb.buttons = ["Search", "Cancel"]
     kb.observeField("buttonSelected", "onSearchButton")
     kb.observeField("wasClosed", "onSearchClosed")
@@ -436,6 +438,9 @@ sub startChannel(index as integer, dir as integer, fresh as boolean)
     if index < 0 then index = n - 1
     if index >= n then index = 0
     if fresh then m.skips = 0
+    cid = m.content.getChild(index).cid
+    if fresh and m.curCid <> "" and m.curCid <> cid then m.prevCid = m.curCid
+    m.curCid = cid
     m.playIndex = index
     m.dir = dir
     m.streamIdx = 0
@@ -538,9 +543,27 @@ sub channelFailed()
     startChannel(m.playIndex + m.dir, m.dir, false)
 end sub
 
+sub playPrev()
+    if m.prevCid = ""
+        showToast("No previous channel yet")
+        return
+    end if
+    idx = findChannel(m.prevCid)
+    if idx < 0
+        showToast("Last channel isn't in this list")
+        return
+    end if
+    startChannel(idx, 1, true)
+end sub
+
+function chName(ch as object) as string
+    if ch.num <> invalid then return ch.num + "  " + ch.title
+    return ch.title
+end function
+
 sub showBanner()
     ch = m.content.getChild(m.playIndex)
-    m.bName.text = ch.title
+    m.bName.text = chName(ch)
     m.bLogo.uri = ""
     if ch.hdSmallIconUrl <> invalid then m.bLogo.uri = ch.hdSmallIconUrl
     nowP = invalid
@@ -568,7 +591,7 @@ sub showBanner()
     else
         m.bNext.text = ""
     end if
-    if m.favs.DoesExist(ch.cid) then m.bName.text = ch.title + "   (Favorite)"
+    if m.favs.DoesExist(ch.cid) then m.bName.text = chName(ch) + "   (Favorite)"
     m.banner.visible = true
     m.bannerTimer.control = "stop"
     m.bannerTimer.control = "start"
@@ -628,6 +651,8 @@ function onKeyEvent(key as string, press as boolean) as boolean
             startChannel(m.playIndex + 1, 1, true)
         else if key = "OK"
             openWatchMenu()
+        else if key = "replay"
+            playPrev()
         else if key = "back"
             leavePlayer()
         else if key = "options"
@@ -653,6 +678,9 @@ function onKeyEvent(key as string, press as boolean) as boolean
             return true
         else if key = "OK"
             onProgramSelected()
+            return true
+        else if key = "replay"
+            playPrev()
             return true
         end if
     end if

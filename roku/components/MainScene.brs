@@ -24,6 +24,8 @@ sub init()
     m.iTime = m.top.findNode("iTime")
     m.iDesc = m.top.findNode("iDesc")
     m.iButtons = m.top.findNode("iButtons")
+    m.watchMenu = m.top.findNode("watchMenu")
+    m.wList = m.top.findNode("wList")
     m.toast = m.top.findNode("toast")
     m.loading = m.top.findNode("loading")
     m.tuneTimer = m.top.findNode("tuneTimer")
@@ -53,6 +55,7 @@ sub init()
     m.grid.observeField("selected", "onProgramSelected")
     m.menuList.observeField("itemSelected", "onMenuSelected")
     m.iButtons.observeField("itemSelected", "onInfoButton")
+    m.wList.observeField("itemSelected", "onWatchItem")
     m.video.observeField("state", "onVideoState")
     m.tuneTimer.observeField("fire", "onTuneTimeout")
     m.bannerTimer.observeField("fire", "hideBanner")
@@ -217,6 +220,7 @@ sub showGuide()
     m.player.visible = false
     m.menu.visible = false
     m.info.visible = false
+    m.watchMenu.visible = false
     m.guide.visible = true
     if m.content <> invalid and m.content.getChildCount() > 0
         m.grid.setFocus(true)
@@ -436,6 +440,7 @@ sub startChannel(index as integer, dir as integer, fresh as boolean)
     m.dir = dir
     m.streamIdx = 0
     m.mode = "player"
+    m.watchMenu.visible = false
     m.guide.visible = false
     m.menu.visible = false
     m.info.visible = false
@@ -481,7 +486,7 @@ sub playStream()
 end sub
 
 sub onVideoState()
-    if m.mode <> "player" then return
+    if m.mode <> "player" and m.mode <> "watchmenu" then return
     st = m.video.state
     if st = "playing"
         m.tuneTimer.control = "stop"
@@ -500,7 +505,7 @@ sub onVideoState()
 end sub
 
 sub onTuneTimeout()
-    if m.mode = "player" and m.tuning = true then nextStream()
+    if (m.mode = "player" or m.mode = "watchmenu") and m.tuning = true then nextStream()
 end sub
 
 sub nextStream()
@@ -525,7 +530,7 @@ sub channelFailed()
     if m.skips >= 8 or m.content.getChildCount() < 2
         m.video.control = "stop"
         m.tuning = false
-        m.status.text = "This channel isn't working right now. Press OK for the guide."
+        m.status.text = "This channel isn't working right now. Press Back for the guide."
         m.status.visible = true
         return
     end if
@@ -569,6 +574,35 @@ sub showBanner()
     m.bannerTimer.control = "start"
 end sub
 
+sub openWatchMenu()
+    ch = m.content.getChild(m.playIndex)
+    m.wList.content = listContent([favLabel(ch.cid), "Guide", "Keep watching"])
+    m.wList.jumpToItem = 0
+    m.mode = "watchmenu"
+    m.watchMenu.visible = true
+    showBanner()
+    m.wList.setFocus(true)
+end sub
+
+sub closeWatchMenu()
+    m.watchMenu.visible = false
+    m.mode = "player"
+    m.top.setFocus(true)
+end sub
+
+sub onWatchItem()
+    i = m.wList.itemSelected
+    if i = 0
+        toggleFav(m.playIndex)
+        closeWatchMenu()
+        showBanner()
+    else if i = 1
+        leavePlayer()
+    else
+        closeWatchMenu()
+    end if
+end sub
+
 sub hideBanner()
     m.banner.visible = false
 end sub
@@ -592,7 +626,9 @@ function onKeyEvent(key as string, press as boolean) as boolean
             startChannel(m.playIndex - 1, -1, true)
         else if key = "down"
             startChannel(m.playIndex + 1, 1, true)
-        else if key = "OK" or key = "back"
+        else if key = "OK"
+            openWatchMenu()
+        else if key = "back"
             leavePlayer()
         else if key = "options"
             toggleFav(m.playIndex)
@@ -601,6 +637,11 @@ function onKeyEvent(key as string, press as boolean) as boolean
             showBanner()
         end if
         return true
+    else if m.mode = "watchmenu"
+        if key = "back" or key = "options"
+            closeWatchMenu()
+            return true
+        end if
     else if m.mode = "menu" or m.mode = "info"
         if key = "back" or key = "options"
             showGuide()

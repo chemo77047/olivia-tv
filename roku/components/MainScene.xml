@@ -33,7 +33,13 @@
         <Label id="bNext" translation="[300,970]" width="1560" font="font:SmallSystemFont" color="0xBBCCCCFF" />
         <Label id="bClock" translation="[1460,860]" width="400" horizAlign="right" font="font:MediumBoldSystemFont" color="0xFFFFFFFF" />
         <Label id="bHint" translation="[1060,1030]" width="800" horizAlign="right" font="font:SmallestSystemFont" color="0x99F6E4FF"
-          text="Up/Down  Change channel    OK  Guide    *  Favorite" />
+          text="Up/Down  Change channel    OK  Menu    Back  Guide" />
+      </Group>
+      <Group id="watchMenu" visible="false">
+        <Rectangle translation="[60,520]" width="640" height="280" color="0x0D2A30F0" />
+        <Rectangle translation="[60,520]" width="640" height="6" color="0x14B8A6FF" />
+        <LabelList id="wList" translation="[90,560]" itemSize="[580,64]" itemSpacing="[0,8]" numRows="3"
+          color="0xFFFFFFFF" focusedColor="0x071A1EFF" focusBitmapBlendColor="0x14B8A6FF" font="font:MediumSystemFont" focusedFont="font:MediumBoldSystemFont" />
       </Group>
       <Label id="status" visible="false" translation="[0,500]" width="1920" horizAlign="center" font="font:LargeBoldSystemFont" color="0xFFFFFFFF" />
     </Group>

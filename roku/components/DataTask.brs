@@ -6,6 +6,10 @@ sub serve()
     m.top.status = "loading"
     m.channels = loadJson("channels.json", "pkg:/data/channels.json")
     if type(m.channels) <> "roArray" then m.channels = []
+    m.byId = {}
+    for i = 0 to m.channels.Count() - 1
+        m.byId[m.channels[i].id] = i
+    end for
     m.guide = {}
     g = loadJson("roku_guide.json", "")
     if type(g) = "roAssociativeArray" and g.ch <> invalid then m.guide = g.ch
@@ -116,9 +120,25 @@ sub build(req as object)
     winEnd = nowS + 12 * 3600
     root = CreateObject("roSGNode", "ContentNode")
     root.addFields({section: section, query: query})
-    for ci = 0 to m.channels.Count() - 1
+    idxs = []
+    if section = "recent"
+        rs = regStr("recent")
+        if rs <> ""
+            ids = ParseJson(rs)
+            if type(ids) = "roArray"
+                for each id in ids
+                    if m.byId.DoesExist(id) then idxs.Push(m.byId[id])
+                end for
+            end if
+        end if
+    else
+        for ci = 0 to m.channels.Count() - 1
+            if include(m.channels[ci], section, query, favs, failed, nowS) then idxs.Push(ci)
+        end for
+    end if
+    for each ci in idxs
         c = m.channels[ci]
-        if include(c, section, query, favs, failed, nowS)
+        if true
             ch = root.createChild("ContentNode")
             ch.title = c.name
             if c.logo <> invalid then ch.hdSmallIconUrl = c.logo

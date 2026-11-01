@@ -31,12 +31,16 @@ def quality(st):
 
 
 def stream_ok(st):
+    return try_stream(st, 10) or try_stream(st, 20)
+
+
+def try_stream(st, timeout):
     headers = {"User-Agent": st.get("user_agent") or UA}
     if st.get("referrer"):
         headers["Referer"] = st["referrer"]
     try:
         req = urllib.request.Request(st["url"], headers=headers)
-        with urllib.request.urlopen(req, timeout=10) as r:
+        with urllib.request.urlopen(req, timeout=timeout) as r:
             if r.status != 200:
                 return False
             body = r.read(65536)

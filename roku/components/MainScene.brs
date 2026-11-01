@@ -25,6 +25,8 @@ sub init()
     m.iDesc = m.top.findNode("iDesc")
     m.iButtons = m.top.findNode("iButtons")
     m.watchMenu = m.top.findNode("watchMenu")
+    m.pvLabel = m.top.findNode("pvLabel")
+    m.previewTimer = m.top.findNode("previewTimer")
     m.wList = m.top.findNode("wList")
     m.toast = m.top.findNode("toast")
     m.loading = m.top.findNode("loading")
@@ -47,11 +49,22 @@ sub init()
     m.infoChannel = -1
     m.infoProgram = invalid
     m.curCid = ""
+    m.previewCh = -1
+    m.previewPlaying = false
+    m.previewOrder = invalid
+    m.order = invalid
+    m.best = regJson("best")
+    m.recent = []
+    rs = regStr("recent")
+    if rs <> ""
+        v = ParseJson(rs)
+        if type(v) = "roArray" then m.recent = v
+    end if
     m.prevCid = ""
     m.favs = regJson("favs")
     m.failed = regJson("failed")
 
-    m.sections = [["fav", "Favorites"], ["kids", "Kids"], ["mx", "México"], ["es", "Español (US)"], ["us", "US"], ["all", "All Channels"]]
+    m.sections = [["fav", "Favorites"], ["recent", "Recently watched"], ["kids", "Kids"], ["mx", "México"], ["es", "Español (US)"], ["us", "US"], ["all", "All Channels"]]
 
     m.grid.observeField("focused", "onProgramFocused")
     m.grid.observeField("selected", "onProgramSelected")
@@ -60,6 +73,7 @@ sub init()
     m.wList.observeField("itemSelected", "onWatchItem")
     m.video.observeField("state", "onVideoState")
     m.tuneTimer.observeField("fire", "onTuneTimeout")
+    m.previewTimer.observeField("fire", "onPreviewTimer")
     m.bannerTimer.observeField("fire", "hideBanner")
     m.toastTimer.observeField("fire", "hideToast")
     m.clockTimer.observeField("fire", "updateClock")
@@ -174,6 +188,7 @@ sub onResult()
     root = m.task.result
     if root = invalid then return
     m.loading.visible = false
+    stopPreview()
     m.content = root
     m.section = root.section
     count = root.getChildCount()
@@ -186,6 +201,8 @@ sub onResult()
     if count = 0
         if m.section = "fav"
             m.emptyLabel.text = "No favorites yet. Press * on a channel to add it."
+        else if m.section = "recent"
+            m.emptyLabel.text = "Nothing watched yet."
         else
             m.emptyLabel.text = "No channels found."
         end if
@@ -224,6 +241,7 @@ sub showGuide()
     m.info.visible = false
     m.watchMenu.visible = false
     m.guide.visible = true
+    if m.previewCh < 0 then m.video.visible = false
     if m.content <> invalid and m.content.getChildCount() > 0
         m.grid.setFocus(true)
     else
@@ -238,6 +256,7 @@ sub onProgramFocused()
     ch = m.content.getChild(ci)
     if ch = invalid then return
     m.focusChannel = ci
+    if m.mode = "guide" then schedulePreview(ci)
     p = d.prog
     if p = invalid or isNoInfo(p)
         m.sTitle.text = ch.title
@@ -451,22 +470,37 @@ sub startChannel(index as integer, dir as integer, fresh as boolean)
     m.info.visible = false
     m.player.visible = true
     m.top.setFocus(true)
+    setVideoFull(true)
     showBanner()
+    if fresh and m.previewCh = index and m.previewPlaying and m.previewOrder <> invalid
+        m.previewCh = -1
+        m.order = m.previewOrder
+        m.tuning = false
+        m.status.visible = false
+        markPlaying()
+        return
+    end if
+    m.previewTimer.control = "stop"
+    m.previewCh = -1
+    m.order = streamOrder(m.content.getChild(index))
     playStream()
 end sub
 
-sub playStream()
-    ch = m.content.getChild(m.playIndex)
-    streams = ch.srcList
-    if streams = invalid or m.streamIdx >= streams.Count()
-        channelFailed()
-        return
+function streamOrder(ch as object) as object
+    order = []
+    n = 0
+    if ch.srcList <> invalid then n = ch.srcList.Count()
+    b = m.best[ch.cid]
+    if b <> invalid
+        if b >= 0 and b < n then order.Push(b) else b = invalid
     end if
-    s = streams[m.streamIdx]
-    if type(s) <> "roAssociativeArray" or s.u = invalid
-        nextStream()
-        return
-    end if
+    for i = 0 to n - 1
+        if b = invalid or i <> b then order.Push(i)
+    end for
+    return order
+end function
+
+function streamContent(ch as object, s as object) as object
     c = CreateObject("roSGNode", "ContentNode")
     c.url = s.u
     c.title = ch.title
@@ -480,6 +514,75 @@ sub playStream()
     if s.ua <> invalid then headers.Push("User-Agent:" + s.ua)
     if s.ref <> invalid then headers.Push("Referer:" + s.ref)
     if headers.Count() > 0 then c.HttpHeaders = headers
+    return c
+end function
+
+sub setVideoFull(full as boolean)
+    if full
+        m.video.translation = [0, 0]
+        m.video.width = 1920
+        m.video.height = 1080
+    else
+        m.video.translation = [1594, 130]
+        m.video.width = 266
+        m.video.height = 150
+    end if
+    m.video.visible = true
+end sub
+
+' ---------- guide preview ----------
+
+sub schedulePreview(ci as integer)
+    if ci = m.previewCh then return
+    m.previewCh = ci
+    m.previewPlaying = false
+    m.video.control = "stop"
+    m.video.visible = false
+    m.pvLabel.text = "Loading preview..."
+    m.previewTimer.control = "stop"
+    m.previewTimer.control = "start"
+end sub
+
+sub onPreviewTimer()
+    if m.mode <> "guide" or m.content = invalid or m.previewCh < 0 then return
+    ch = m.content.getChild(m.previewCh)
+    if ch = invalid then return
+    order = streamOrder(ch)
+    s = invalid
+    if order.Count() > 0 then s = ch.srcList[order[0]]
+    if type(s) <> "roAssociativeArray" or s.u = invalid
+        m.pvLabel.text = "No preview"
+        return
+    end if
+    m.previewOrder = order
+    setVideoFull(false)
+    m.video.content = streamContent(ch, s)
+    m.video.control = "play"
+end sub
+
+sub stopPreview()
+    m.previewTimer.control = "stop"
+    m.previewCh = -1
+    m.previewPlaying = false
+    if m.mode <> "player" and m.mode <> "watchmenu"
+        m.video.control = "stop"
+        m.video.visible = false
+    end if
+end sub
+
+sub playStream()
+    ch = m.content.getChild(m.playIndex)
+    streams = ch.srcList
+    if streams = invalid or m.order = invalid or m.streamIdx >= m.order.Count()
+        channelFailed()
+        return
+    end if
+    s = streams[m.order[m.streamIdx]]
+    if type(s) <> "roAssociativeArray" or s.u = invalid
+        nextStream()
+        return
+    end if
+    c = streamContent(ch, s)
     m.status.text = "Tuning..."
     m.status.visible = true
     m.tuning = true
@@ -491,22 +594,54 @@ sub playStream()
 end sub
 
 sub onVideoState()
-    if m.mode <> "player" and m.mode <> "watchmenu" then return
     st = m.video.state
-    if st = "playing"
-        m.tuneTimer.control = "stop"
-        m.status.visible = false
-        m.tuning = false
-        m.skips = 0
-        ch = m.content.getChild(m.playIndex)
-        if m.failed.DoesExist(ch.cid)
-            m.failed.Delete(ch.cid)
-            regWrite("failed", FormatJson(m.failed))
+    if m.mode <> "player" and m.mode <> "watchmenu"
+        if m.previewCh >= 0
+            if st = "playing"
+                m.previewPlaying = true
+            else if st = "error"
+                m.previewPlaying = false
+                m.video.visible = false
+                m.pvLabel.text = "No preview"
+            end if
         end if
-        regWrite("last", ch.cid)
+        return
+    end if
+    if st = "playing"
+        markPlaying()
     else if st = "error" or (st = "finished" and m.tuning = true)
         nextStream()
     end if
+end sub
+
+sub markPlaying()
+    m.tuneTimer.control = "stop"
+    m.status.visible = false
+    m.tuning = false
+    m.skips = 0
+    ch = m.content.getChild(m.playIndex)
+    if m.failed.DoesExist(ch.cid)
+        m.failed.Delete(ch.cid)
+        regWrite("failed", FormatJson(m.failed))
+    end if
+    regWrite("last", ch.cid)
+    addRecent(ch.cid)
+    if m.order <> invalid and m.streamIdx < m.order.Count()
+        b = m.order[m.streamIdx]
+        if m.best[ch.cid] = invalid or m.best[ch.cid] <> b
+            m.best[ch.cid] = b
+            regWrite("best", FormatJson(m.best))
+        end if
+    end if
+end sub
+
+sub addRecent(cid as string)
+    arr = [cid]
+    for each c in m.recent
+        if c <> cid and arr.Count() < 10 then arr.Push(c)
+    end for
+    m.recent = arr
+    regWrite("recent", FormatJson(arr))
 end sub
 
 sub onTuneTimeout()
@@ -632,10 +767,22 @@ end sub
 
 sub leavePlayer()
     m.tuneTimer.control = "stop"
+    keep = (not m.tuning) and m.video.state = "playing"
     m.tuning = false
-    m.video.control = "stop"
     m.status.visible = false
     m.banner.visible = false
+    m.watchMenu.visible = false
+    if keep
+        m.previewCh = m.playIndex
+        m.previewPlaying = true
+        m.previewOrder = streamOrder(m.content.getChild(m.playIndex))
+        setVideoFull(false)
+    else
+        m.previewCh = -1
+        m.previewPlaying = false
+        m.video.control = "stop"
+        m.video.visible = false
+    end if
     if m.playIndex >= 0 then m.grid.jumpTo = m.playIndex
     showGuide()
 end sub

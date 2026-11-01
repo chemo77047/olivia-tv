@@ -11,10 +11,12 @@
 
       <Rectangle id="strip" translation="[60,130]" width="1800" height="150" color="0x0D2A30FF" />
       <Rectangle translation="[60,130]" width="8" height="150" color="0x14B8A6FF" />
-      <Label id="sTitle" translation="[90,140]" width="1740" font="font:MediumBoldSystemFont" color="0xFFFFFFFF" />
-      <Label id="sTime" translation="[90,186]" width="1740" font="font:SmallSystemFont" color="0x5EEAD4FF" />
-      <Label id="sDesc" translation="[90,220]" width="1740" height="56" wrap="true" maxLines="2" font="font:SmallestSystemFont" color="0xCCDDDDFF" />
+      <Label id="sTitle" translation="[90,140]" width="1480" font="font:MediumBoldSystemFont" color="0xFFFFFFFF" />
+      <Label id="sTime" translation="[90,186]" width="1480" font="font:SmallSystemFont" color="0x5EEAD4FF" />
+      <Label id="sDesc" translation="[90,220]" width="1480" height="56" wrap="true" maxLines="2" font="font:SmallestSystemFont" color="0xCCDDDDFF" />
 
+      <Rectangle translation="[1594,130]" width="266" height="150" color="0x000000FF" />
+      <Label id="pvLabel" translation="[1594,130]" width="266" height="150" horizAlign="center" vertAlign="center" font="font:SmallestSystemFont" color="0x99F6E4FF" />
       <Guide id="grid" translation="[60,300]" />
 
       <Label id="emptyLabel" visible="false" translation="[60,560]" width="1800" horizAlign="center" font="font:MediumSystemFont" color="0x99F6E4FF" />
@@ -22,8 +24,8 @@
         text="OK  Watch or show info        *  Menu: sections, search, favorites        Back  Exit" />
     </Group>
 
+    <Video id="video" visible="false" width="1920" height="1080" enableUI="false" />
     <Group id="player" visible="false">
-      <Video id="video" width="1920" height="1080" enableUI="false" />
       <Group id="banner" visible="false">
         <Rectangle translation="[0,820]" width="1920" height="260" color="0x071A1EE6" />
         <Rectangle translation="[0,820]" width="1920" height="6" color="0x14B8A6FF" />
@@ -68,6 +70,7 @@
     <Label id="toast" visible="false" translation="[0,60]" width="1920" horizAlign="center" font="font:MediumBoldSystemFont" color="0x5EEAD4FF" />
     <Label id="loading" text="Loading channels..." translation="[0,560]" width="1920" horizAlign="center" font="font:LargeBoldSystemFont" color="0x14B8A6FF" />
 
+    <Timer id="previewTimer" duration="1.2" repeat="false" />
     <Timer id="tuneTimer" duration="15" repeat="false" />
     <Timer id="bannerTimer" duration="6" repeat="false" />
     <Timer id="toastTimer" duration="3" repeat="false" />
